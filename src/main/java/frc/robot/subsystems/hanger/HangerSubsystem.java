@@ -5,6 +5,7 @@
 package frc.robot.subsystems.hanger;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
@@ -27,16 +28,34 @@ public class HangerSubsystem extends SubsystemBase {
   */
 
   private TalonFX hanger;
+  private VoltageOut m_request = new VoltageOut(0);
 
   public HangerSubsystem() {
     hanger = new TalonFX(HangerConstants.hangerMotorID);
+    coast();
     
     // Extra: Set up the software limits for the hanger motor 
   }
 
   // Method to request applied voltage (double volts) to the hanger motor
 
+  public void setVoltage(double voltage) {
+    hanger.setControl(m_request.withOutput(voltage));
+  }
+
   // The other basic motor control methods. Eg coast, brake, etc.
+
+  public void coast() {
+    hanger.setNeutralMode(NeutralModeValue.Coast);
+  }
+
+  public void brake() {
+    hanger.setNeutralMode(NeutralModeValue.Brake);
+  }
+
+  public void stop() {
+    hanger.set(0);
+  }
 
   @Override
   public void periodic() {
