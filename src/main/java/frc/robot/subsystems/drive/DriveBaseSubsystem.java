@@ -60,13 +60,27 @@ public class DriveBaseSubsystem extends SubsystemBase {
                 VecBuilder.fill(0.1, 0.1, 0.1));
     }
 
-    public void estimatePost() {
+    public void estimatePose() {
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
         if (limelightMeasurement.tagCount >= 2) {
             m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
             m_poseEstimator.addVisionMeasurement(
                     limelightMeasurement.pose,
                     limelightMeasurement.timestampSeconds);
+        }
+    }
+
+    public void turnToTarget() {
+        //add a check to see if we are on red or blue alliance at another time
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        if (limelightMeasurement.tagCount >= 2) {
+            double targetYaw = limelightMeasurement.pose.getRotation().getDegrees();
+            double currentYaw = getYaw();
+            double error = targetYaw - currentYaw;
+            double kP = 0.01;
+            double turnSpeed = error * kP;
+            setModuleStates(Constants.SwerveConstants.m_SwerveDriveKinematics.toSwerveModuleStates(
+                    new ChassisSpeeds(0, 0, turnSpeed)));
         }
     }
 
